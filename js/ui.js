@@ -1,6 +1,6 @@
 /* DOM layer: menus, HUD, board rendering and input. All rules live in engine.js. */
 (function () {
-  const { data: D, engine: E, art: A } = window.BAL;
+  const { data: D, engine: E, art: A, sound: S } = window.BAL;
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -338,7 +338,15 @@
   }
 
   function handleEvents() {
-    for (const ev of E.drainEvents(game)) {
+    const events = E.drainEvents(game);
+    const won = events.some((ev) => ev.type === 'won');
+    for (const ev of events) {
+      if (ev.type === 'done') S.play('done');
+      else if (ev.type === 'materials') S.play('mill');
+      else if (ev.type === 'goal' && !won) S.play('goal');
+      else if (ev.type === 'won') S.play('win');
+    }
+    for (const ev of events) {
       if (ev.type === 'money' && ev.lot != null) floatText(ev.lot, (ev.amount > 0 ? '+' : '') + fmt(ev.amount), ev.amount < 0);
       else if (ev.type === 'materials') floatText(ev.lot, `+${ev.amount} materials`);
       else if (ev.type === 'msg') addLog(ev.text);
@@ -375,11 +383,17 @@
   }
 
   // ---------- input ----------
+  const ACTION_SOUNDS = {
+    buyLot: 'buy', build: 'hammer', buildSpecial: 'hammer', upgrade: 'hammer', demolish: 'crash', sell: 'sell',
+    collect: 'coin', collectAll: 'coin', hire: 'hire', buyMaterials: 'materials',
+  };
+
   function doAction(act, arg) {
     if (!game || game.status !== 'playing') return;
     const fn = E.actions[act];
     const res = act === 'collectAll' || act === 'hire' ? fn(game) : act === 'buyMaterials' ? fn(game, arg) : fn(game, selected, arg);
     if (!res.ok && res.reason) addLog(res.reason);
+    S.play(res.ok ? ACTION_SOUNDS[act] : 'error');
     handleEvents();
     render();
   }
@@ -387,6 +401,20 @@
   function select(id) {
     selected = id;
     render();
+  }
+
+  function renderSound() {
+    const on = !S.isMuted();
+    const b = $('sound');
+    b.setAttribute('aria-pressed', String(on));
+    b.textContent = on ? '♪ Sound on' : '♪ Sound off';
+    b.title = `${on ? 'Mute' : 'Unmute'} sound effects (M)`;
+  }
+
+  function toggleSound() {
+    S.setMuted(!S.isMuted());
+    renderSound();
+    S.play('click');
   }
 
   function setSpeed(v) {
@@ -417,6 +445,8 @@
     });
 
     $('to-menu').addEventListener('click', () => showScreen('menu'));
+    $('sound').addEventListener('click', toggleSound);
+    renderSound();
     for (const n of [1, 10, 50]) $(`buy${n}`).addEventListener('click', () => doAction('buyMaterials', n));
     $('hire').addEventListener('click', () => doAction('hire'));
     $('collect-all').addEventListener('click', () => doAction('collectAll'));
@@ -430,12 +460,13 @@
       if (coin) {
         const id = Number(coin.dataset.collect);
         E.actions.collect(game, id);
+        S.play('coin');
         handleEvents();
         render();
         return;
       }
       const lot = e.target.closest('.lot');
-      if (lot) select(Number(lot.dataset.lot));
+      if (lot) { S.play('click'); select(Number(lot.dataset.lot)); }
     });
     $('board').addEventListener('keydown', (e) => {
       const lot = e.target.closest('.lot');
@@ -463,6 +494,7 @@
       else if (e.key === 'c' || e.key === 'C') doAction('collectAll');
       else if (e.key === '1' || e.key === '2' || e.key === '3') setSpeed(SPEEDS[Number(e.key)]);
       else if (e.key === 'Escape') select(null);
+      else if (e.key === 'm' || e.key === 'M') toggleSound();
     });
   }
 

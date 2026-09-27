@@ -156,6 +156,7 @@ kbd {
 .price { text-transform: none; letter-spacing: 0; font-family: var(--font-mono); font-weight: 500; }
 .price.up { color: var(--accent); }
 .price.down { color: var(--good); }
+.sound-toggle[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
 .speed { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-left: auto; }
 .speed button { border: 0; background: var(--surface); padding: 6px 10px; cursor: pointer; font-family: var(--font-mono); font-size: 13px; min-width: 38px; }
 .speed button + button { border-left: 1px solid var(--line); }

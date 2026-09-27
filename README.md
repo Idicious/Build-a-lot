@@ -22,7 +22,9 @@ npm start   # python3 -m http.server 8000, then visit http://localhost:8000
 - **Neighbourhood buildings.** A Pocket Park adds +20% rent to the houses next to it and across the street. A Lumber Mill makes materials every day. A Workshop speeds up all construction.
 - **Eight streets.** Each street has its own goals. Finish them and the next street unlocks. Finish by the street's Expert day to earn a gold key. Your progress is saved in the browser.
 
-Keys: `Space` pause, `C` collect all rent, `1`–`3` game speed, `Esc` deselect.
+Sound effects are synthesized in the browser with the Web Audio API, so there are no audio files. Toggle them with the Sound button or `M`; the choice is remembered.
+
+Keys: `Space` pause, `C` collect all rent, `1`–`3` game speed, `Esc` deselect, `M` mute sound.
 
 ## Code
 
@@ -31,6 +33,7 @@ Keys: `Space` pause, `C` collect all rent, `1`–`3` game speed, `Esc` deselect.
 | `js/data.js` | Buildings, upgrades, balance constants and level definitions |
 | `js/engine.js` | Game rules as pure state transitions (no DOM), so they run in Node |
 | `js/art.js` | Procedural SVG for lots, houses and neighbourhood buildings |
+| `js/sound.js` | Synthesized sound effects (Web Audio API) and the mute setting |
 | `js/ui.js` | Menus, HUD, board rendering and input |
 | `tests/` | Engine tests, plus a greedy bot that must win every street |
 

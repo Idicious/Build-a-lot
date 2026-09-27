@@ -27,7 +27,7 @@
           <li><strong>Collect rent.</strong> Tenants pay once a day. Click the coin above a house to bank it. Unpaid rent stops piling up after 3 days.</li>
           <li><strong>Grow.</strong> Hire more crew, upgrade houses for higher rent, sell at a profit, and open parks, mills and workshops.</li>
         </ol>
-        <p class="keys">Keys: <kbd>Space</kbd> pause, <kbd>C</kbd> collect all rent, <kbd>1</kbd>–<kbd>3</kbd> game speed, <kbd>Esc</kbd> deselect.</p>
+        <p class="keys">Keys: <kbd>Space</kbd> pause, <kbd>C</kbd> collect all rent, <kbd>1</kbd>–<kbd>3</kbd> game speed, <kbd>Esc</kbd> deselect, <kbd>M</kbd> mute sound.</p>
       </div>
     </header>
     <ol id="levels" class="levels"></ol>
@@ -65,6 +65,7 @@
           <button id="hire" class="btn small" type="button"></button></span>
       </div>
       <button id="collect-all" class="btn primary small" type="button">Collect rent</button>
+      <button id="sound" class="btn ghost small sound-toggle" type="button" aria-pressed="true">♪ Sound on</button>
       <div class="speed" role="group" aria-label="Game speed">
         <button type="button" data-speed="0" aria-label="Pause">❚❚</button>
         <button type="button" data-speed="1">1×</button>
@@ -107,6 +108,7 @@
 <script src="js/data.js"></script>
 <script src="js/engine.js"></script>
 <script src="js/art.js"></script>
+<script src="js/sound.js"></script>
 <script src="js/ui.js"></script>
 </body>
 </html>
