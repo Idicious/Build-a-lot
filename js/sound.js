@@ -17,6 +17,9 @@
   // Browsers only allow audio after a user gesture, so this is first called from a click or tap.
   function ensure() {
     if (!ctx) {
+      // iOS mutes Web Audio while the ring/silent switch is on unless the page asks for
+      // playback, as a game or music player would (Safari 16.4+).
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* unsupported */ }
       const AC = root.AudioContext || root.webkitAudioContext;
       if (!AC) return null;
       ctx = new AC();
@@ -27,7 +30,8 @@
       const d = noiseBuffer.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    // Safari reports 'interrupted' after a call or a switch to another app, not 'suspended'.
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
   }
 
@@ -103,10 +107,24 @@
     if (!muted) ensure();
   }
 
-  // Unlock audio on the first interaction so sounds from the game clock can play later.
-  const unlock = () => { if (!muted) ensure(); root.removeEventListener('pointerdown', unlock); root.removeEventListener('keydown', unlock); };
-  root.addEventListener('pointerdown', unlock);
-  root.addEventListener('keydown', unlock);
+  // Unlock audio on user gestures so sounds from the game clock can play later. Touch-down does
+  // not count as a gesture in Safari or Chrome, so listen for the end of a tap, and keep
+  // listening until audio is actually running (it can be refused, or interrupted later).
+  const GESTURES = ['touchend', 'pointerup', 'click', 'keydown'];
+  function unlock() {
+    if (muted || !ensure()) return;
+    // Older iOS versions only unlock once a sound starts inside the gesture.
+    const src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    src.connect(ctx.destination);
+    src.start(0);
+    if (ctx.state === 'running') GESTURES.forEach((g) => root.removeEventListener(g, unlock, true));
+  }
+  GESTURES.forEach((g) => root.addEventListener(g, unlock, true));
+  // Coming back to the tab or app: re-arm the unlock in case the browser suspended audio.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && ctx && ctx.state !== 'running') GESTURES.forEach((g) => root.addEventListener(g, unlock, true));
+  });
 
   root.BAL = Object.assign(root.BAL || {}, { sound: { play, setMuted, isMuted: () => muted } });
 })(typeof self !== 'undefined' ? self : this);
