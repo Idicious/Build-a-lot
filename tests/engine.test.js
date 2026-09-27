@@ -174,3 +174,18 @@ for (const [i, L] of D.LEVELS.entries()) {
     }
   });
 }
+
+test('every asset in index.html carries the build stamp the deploy replaces', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const root = path.join(__dirname, '..');
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(html, /<html[^>]* data-build="__BUILD__"/);
+  const local = [...html.matchAll(/(?:src|href)="((?:js|css)\/[^"]+)"/g)].map((m) => m[1]);
+  assert.ok(local.length >= 6, 'found the stylesheet and scripts');
+  for (const ref of local) {
+    assert.match(ref, /\?v=__BUILD__$/, `${ref} needs ?v=__BUILD__`);
+    assert.ok(fs.existsSync(path.join(root, ref.split('?')[0])), `${ref} exists`);
+  }
+  assert.match(fs.readFileSync(path.join(root, 'js/ui.js'), 'utf8'), /const BUILD = '__BUILD__';/);
+});

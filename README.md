@@ -42,3 +42,9 @@ npm test
 ```
 
 The bot tests guard the level balance: every street must be winnable with three different market seeds, within 1.5× the Expert day target.
+
+## Deploy
+
+`.github/workflows/pages.yml` runs the tests on every pull request and push. On `main` it also publishes the game to GitHub Pages. For this, set **Settings → Pages → Source** to **GitHub Actions**.
+
+Each deploy replaces the `__BUILD__` placeholder in `index.html`, its asset URLs and `js/ui.js` with the commit ID. A new page therefore asks for matching files instead of reusing cached old ones. If a cached page from an earlier deploy still meets newer scripts, `ui.js` notices the different build ID and reloads once to fetch a matching set. When you add a stylesheet or script, give its URL `?v=__BUILD__`; a test checks for this.

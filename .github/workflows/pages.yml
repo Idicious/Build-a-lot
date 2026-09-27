@@ -1,0 +1,51 @@
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # Stamp the commit into index.html, its asset URLs and ui.js so every deploy
+      # gets fresh, matching files instead of a mix of cached old and new ones.
+      - name: Assemble site
+        run: |
+          build="${GITHUB_SHA::8}"
+          mkdir _site
+          cp -r index.html css js _site/
+          sed -i "s/__BUILD__/${build}/g" _site/index.html _site/js/ui.js
+          if grep -rq "__BUILD__" _site; then echo "Unstamped build placeholder left in _site"; exit 1; fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
