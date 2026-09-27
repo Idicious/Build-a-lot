@@ -3,15 +3,6 @@
   const W = 160;
   const GROUND = 104; // y of the front edge of the house footprint
 
-  // Base and repainted wall colours per house type.
-  const STYLE = {
-    rambler:   { w: 96, h: 30, wall: '#c9b79a', paint: '#8fb3c9', roof: '#6b4f3f', trim: '#f4efe6' },
-    cottage:   { w: 72, h: 34, wall: '#d8c7a6', paint: '#e6a6a0', roof: '#4f5e6b', trim: '#fbf7ee' },
-    colonial:  { w: 92, h: 56, wall: '#b9a38e', paint: '#e4dccb', roof: '#3f4a55', trim: '#ffffff' },
-    victorian: { w: 86, h: 58, wall: '#9fb0a0', paint: '#b8a1c9', roof: '#5a3d52', trim: '#fff7e8' },
-    craftsman: { w: 100, h: 44, wall: '#a88e6c', paint: '#7f9a78', roof: '#5b4636', trim: '#f1e8d4' },
-    mansion:   { w: 132, h: 62, wall: '#d6cab6', paint: '#f2ece0', roof: '#39424c', trim: '#ffffff' },
-  };
 
   const r = (x, y, w, h, fill, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" ${extra}/>`;
   const poly = (pts, fill, extra = '') => `<polygon points="${pts}" fill="${fill}" ${extra}/>`;
@@ -35,88 +26,233 @@
     return r(x, y - h, 7, h, fill) + r(x - 1, y - h - 2, 9, 3, '#6d3a2e');
   }
 
-  // Core body of each house type, drawn with its front edge on GROUND.
-  const BODY = {
-    rambler(c, wall) {
-      const x = (W - c.w) / 2, y = GROUND - c.h;
-      return gable(x, y, c.w, 16, c.roof, 6) + r(x, y, c.w, c.h, wall) +
-        windowAt(x + 10, y + 9, 14, 11, c.trim) + windowAt(x + 30, y + 9, 14, 11, c.trim) +
-        door(x + 55, y + 10, c.h - 10, c.trim) + r(x + 70, y + 6, 22, c.h - 6, '#e9e4da') +
-        `<g stroke="#cfc8ba" stroke-width="1">${[0, 1, 2, 3].map((i) => `<line x1="${x + 70}" y1="${y + 10 + i * 5}" x2="${x + 92}" y2="${y + 10 + i * 5}"/>`).join('')}</g>`;
-    },
-    cottage(c, wall) {
-      const x = (W - c.w) / 2, y = GROUND - c.h;
-      return chimney(x + c.w - 18, y - 12, 18) + gable(x, y, c.w, 30, c.roof, 5) + r(x, y, c.w, c.h, wall) +
-        poly(`${x + c.w / 2 - 10},${y - 6} ${x + c.w / 2},${y - 16} ${x + c.w / 2 + 10},${y - 6}`, c.trim) +
-        windowAt(x + c.w / 2 - 5, y - 10, 10, 7, c.trim) +
-        windowAt(x + 9, y + 10, 13, 12, c.trim) + windowAt(x + c.w - 22, y + 10, 13, 12, c.trim) +
-        door(x + c.w / 2 - 4.5, y + 12, c.h - 12, c.trim, '#3f6e5a');
-    },
-    colonial(c, wall) {
-      const x = (W - c.w) / 2, y = GROUND - c.h;
-      const sh = '#2f3d4a';
-      let s = chimney(x + 8, y - 4, 14) + chimney(x + c.w - 15, y - 4, 14) + poly(`${x - 4},${y} ${x + 10},${y - 18} ${x + c.w - 10},${y - 18} ${x + c.w + 4},${y}`, c.roof) + r(x, y, c.w, c.h, wall);
-      for (const wx of [x + 12, x + 36, x + 66]) s += windowAt(wx, y + 7, 12, 14, c.trim, sh);
-      for (const wx of [x + 12, x + 66]) s += windowAt(wx, y + 32, 12, 14, c.trim, sh);
-      s += poly(`${x + 36},${y + 30} ${x + 46},${y + 24} ${x + 56},${y + 30}`, c.trim) + door(x + 41.5, y + 31, c.h - 31, c.trim, '#1f3b57');
-      return s;
-    },
-    victorian(c, wall) {
-      const x = (W - c.w) / 2 + 8, y = GROUND - c.h;
-      const tx = x - 20, tw = 26;
-      let s = gable(x, y, c.w, 26, c.roof, 4) + r(x, y, c.w, c.h, wall);
-      s += poly(`${x + c.w - 40},${y} ${x + c.w - 22},${y - 20} ${x + c.w - 4},${y}`, c.trim) + windowAt(x + c.w - 27, y - 11, 10, 9, wall);
-      s += r(tx, y - 8, tw, c.h + 8, wall) + poly(`${tx - 3},${y - 8} ${tx + tw / 2},${y - 38} ${tx + tw + 3},${y - 8}`, c.roof) +
-        `<line x1="${tx + tw / 2}" y1="${y - 38}" x2="${tx + tw / 2}" y2="${y - 45}" stroke="${c.roof}" stroke-width="1.5"/>`;
-      s += windowAt(tx + 8, y + 2, 10, 14, c.trim) + windowAt(tx + 8, y + 30, 10, 14, c.trim);
-      s += windowAt(x + 14, y + 7, 12, 15, c.trim) + windowAt(x + c.w - 30, y + 7, 12, 15, c.trim) + windowAt(x + 14, y + 33, 12, 15, c.trim);
-      s += door(x + c.w - 30, y + 33, c.h - 33, c.trim, '#6a2f45');
-      s += `<g stroke="${c.trim}" stroke-width="1.2">${[0, 1, 2, 3, 4, 5].map((i) => `<line x1="${x + 4 + i * 5}" y1="${y + 1}" x2="${x + 6 + i * 5}" y2="${y + 4}"/>`).join('')}</g>`;
-      return s;
-    },
-    craftsman(c, wall) {
-      const x = (W - c.w) / 2, y = GROUND - c.h;
-      let s = chimney(x + 6, y - 2, 20, '#7d5a44') + poly(`${x - 8},${y + 4} ${x + c.w / 2},${y - 22} ${x + c.w + 8},${y + 4}`, c.roof) + r(x, y + 4, c.w, c.h - 4, wall);
-      s += poly(`${x + 26},${y + 2} ${x + c.w / 2},${y - 12} ${x + c.w - 26},${y + 2}`, c.trim) + windowAt(x + c.w / 2 - 9, y - 5, 18, 6, c.trim);
-      s += r(x - 4, y + 16, c.w + 8, 4, c.roof);
-      s += windowAt(x + 10, y + 25, 22, 12, c.trim) + windowAt(x + c.w - 32, y + 25, 22, 12, c.trim) + door(x + c.w / 2 - 4.5, y + 24, c.h - 24, c.trim, '#5a3b24');
-      for (const px of [x + 2, x + 38, x + c.w - 44, x + c.w - 8]) s += poly(`${px},${GROUND} ${px + 6},${GROUND} ${px + 5},${y + 20} ${px + 1},${y + 20}`, c.trim);
-      return s;
-    },
-    mansion(c, wall) {
-      const x = (W - c.w) / 2, y = GROUND - c.h;
-      const cw = 52, cx = x + (c.w - cw) / 2;
-      let s = '';
-      for (const wx of [x, x + c.w - 40]) {
-        s += poly(`${wx - 3},${y + 24} ${wx + 6},${y + 12} ${wx + 34},${y + 12} ${wx + 43},${y + 24}`, c.roof) + r(wx, y + 24, 40, c.h - 24, wall);
-        s += windowAt(wx + 8, y + 32, 9, 14, c.trim) + windowAt(wx + 23, y + 32, 9, 14, c.trim);
-      }
-      s += chimney(cx + 6, y - 6, 12) + chimney(cx + cw - 13, y - 6, 12);
-      s += poly(`${cx - 4},${y} ${cx + 8},${y - 16} ${cx + cw - 8},${y - 16} ${cx + cw + 4},${y}`, c.roof) + r(cx, y, cw, c.h, wall);
-      s += windowAt(cx + 8, y + 7, 10, 13, c.trim) + windowAt(cx + 21, y + 7, 10, 13, c.trim) + windowAt(cx + 34, y + 7, 10, 13, c.trim);
-      s += poly(`${cx + 10},${y + 28} ${cx + cw / 2},${y + 18} ${cx + cw - 10},${y + 28}`, c.trim) + r(cx + 10, y + 28, cw - 20, 2, c.trim);
-      for (const px of [cx + 11, cx + 18, cx + cw - 21, cx + cw - 14]) s += r(px, y + 30, 3, c.h - 30, c.trim);
-      s += door(cx + cw / 2 - 4.5, y + 38, c.h - 38, c.trim, '#27313b');
-      return s;
-    },
+  // ---- 1930s English houses ----
+
+  const P = {
+    tile: '#9b4631', tileDark: '#74301f', brick: '#a4553c', mortar: '#c3806a', timber: '#33261e',
+    frame: '#f6f2e8', glass: '#86a9bd', glassHi: '#b7cfdb', door: '#2f5d46', sun: '#ecbf4c', sunRay: '#c9652f',
+    stone: '#d9cfb8', green: '#4a7a58', stack: '#8d4330', pot: '#b45a3c', hedge: '#355f2e', hedgeHi: '#4b7a3e',
   };
 
-  function porch(c) {
-    const x = (W - c.w) / 2 - 4, w = c.w + 8, y = GROUND - 20;
-    let s = r(x, GROUND - 3, w, 5, '#b99a76') + r(x - 2, y - 3, w + 4, 4, c.roof);
-    for (let i = 0; i <= 6; i++) s += r(x + (i * (w - 3)) / 6, y, 3, 17, c.trim);
-    s += `<line x1="${x}" y1="${GROUND - 9}" x2="${x + w}" y2="${GROUND - 9}" stroke="${c.trim}" stroke-width="1.5"/>`;
+  // Render colour, and the pastel it takes after the "Fresh paint" upgrade.
+  const STYLE = {
+    rambler:   { w: 100, wall: '#eadfc4', paint: '#d6e6d2' },
+    cottage:   { w: 120, wall: '#e4d8bd', paint: '#f1d6c9' },
+    colonial:  { w: 98,  wall: '#f1eadb', paint: '#f4e5b5' },
+    victorian: { w: 104, wall: '#f4f1e8', paint: '#dcece6' },
+    craftsman: { w: 110, wall: '#e8dcc3', paint: '#e4e6cc' },
+    mansion:   { w: 136, wall: '#f2ecdd', paint: '#f6e6c6' },
+  };
+
+  function hipRoof(x, y, w, rise, inset, over, fill = P.tile) {
+    return poly(`${x - over},${y} ${x + inset},${y - rise} ${x + w - inset},${y - rise} ${x + w + over},${y}`, fill) +
+      `<line x1="${x - over}" y1="${y}" x2="${x + w + over}" y2="${y}" stroke="${P.tileDark}" stroke-width="1.5"/>`;
+  }
+
+  // Chimney stack with two pots; y is where it meets the roof.
+  function stack(x, y, h, w = 8) {
+    return r(x, y - h, w, h + 6, P.stack) + r(x - 1, y - h, w + 2, 2.5, P.tileDark) +
+      r(x + 1, y - h - 4, 2.5, 4, P.pot) + r(x + w - 3.5, y - h - 4, 2.5, 4, P.pot);
+  }
+
+  function brickWall(x, y, w, h) {
+    let s = r(x, y, w, h, P.brick) + `<g stroke="${P.mortar}" stroke-width=".5" opacity=".55">`;
+    for (let yy = y + 3.5; yy < y + h - 0.5; yy += 3.5) s += `<line x1="${x}" y1="${yy}" x2="${x + w}" y2="${yy}"/>`;
+    return s + '</g>';
+  }
+
+  // Metal-framed window with small top lights, as fitted to most houses of the decade.
+  function crittall(x, y, w, h, cols = 2, frame = P.frame) {
+    const t = y + h * 0.32;
+    let s = r(x - 1.2, y - 1.2, w + 2.4, h + 2.4, frame) + r(x, y, w, h, P.glass) + r(x, y, w, h * 0.32, P.glassHi);
+    s += `<g stroke="${frame}" stroke-width=".9"><line x1="${x}" y1="${t}" x2="${x + w}" y2="${t}"/>`;
+    for (let i = 1; i < cols; i++) s += `<line x1="${x + (w * i) / cols}" y1="${y}" x2="${x + (w * i) / cols}" y2="${y + h}"/>`;
+    for (let i = 0; i < cols; i++) s += `<line x1="${x + (w * (i + 0.5)) / cols}" y1="${y}" x2="${x + (w * (i + 0.5)) / cols}" y2="${t}" stroke-width=".5"/>`;
+    return s + '</g>';
+  }
+
+  // Window with horizontal glazing bars, for Art Deco houses.
+  function ribbon(x, y, w, h, bars, rx = 0) {
+    let s = r(x - 1.2, y - 1.2, w + 2.4, h + 2.4, P.frame, `rx="${rx + 1}"`) + r(x, y, w, h, P.glass, `rx="${rx}"`);
+    s += `<g stroke="${P.frame}" stroke-width=".8">`;
+    for (let i = 1; i < bars; i++) s += `<line x1="${x}" y1="${y + (h * i) / bars}" x2="${x + w}" y2="${y + (h * i) / bars}"/>`;
+    return s + '</g>';
+  }
+
+  // Canted bay seen from the front: a wide centre light between two angled side lights.
+  function bay(x, y, w, h, wall, rows = 1) {
+    let s = r(x, y, w, h, wall) + r(x, y, w * 0.18, h, 'rgba(0,0,0,.10)') + r(x + w * 0.82, y, w * 0.18, h, 'rgba(0,0,0,.10)');
+    const rowH = h / rows;
+    for (let i = 0; i < rows; i++) {
+      const wy = y + i * rowH + rowH * 0.22, wh = rowH * 0.56;
+      s += crittall(x + w * 0.25, wy, w * 0.5, wh, 3) + crittall(x + 1.8, wy, w * 0.18 - 3.2, wh, 1) + crittall(x + w * 0.82 + 1.4, wy, w * 0.18 - 3.2, wh, 1);
+    }
     return s;
   }
 
-  function yard(c) {
-    const left = (W - c.w) / 2 - 6, right = (W + c.w) / 2 + 6;
+  // Front door with the sunrise motif of the period in its upper panel.
+  function sunDoor(x, y, h, color = P.door) {
+    const w = 10, cx = x + w / 2, cy = y + h * 0.4, rad = w / 2 - 1.6;
+    let s = r(x - 1.5, y - 1.5, w + 3, h + 1.5, P.frame) + r(x, y, w, h, color);
+    s += `<path d="M${cx - rad} ${cy} A${rad} ${rad} 0 0 1 ${cx + rad} ${cy} Z" fill="${P.sun}"/><g stroke="${P.sunRay}" stroke-width=".6">`;
+    for (const a of [30, 60, 90, 120, 150]) {
+      const t = (a * Math.PI) / 180;
+      s += `<line x1="${cx}" y1="${cy}" x2="${(cx + Math.cos(t) * rad).toFixed(2)}" y2="${(cy - Math.sin(t) * rad).toFixed(2)}"/>`;
+    }
+    return s + '</g>' + r(x + 2, cy + 3, w - 4, h * 0.34, 'rgba(0,0,0,.12)') + `<circle cx="${x + w - 2}" cy="${y + h * 0.64}" r=".9" fill="#e8c35a"/>`;
+  }
+
+  // Arched opening (porch recess or stone doorway) behind a door.
+  function arch(x, w, top, fill) {
+    return `<path d="M${x} ${GROUND} V${top + w / 2} A${w / 2} ${w / 2.6} 0 0 1 ${x + w} ${top + w / 2} V${GROUND} Z" fill="${fill}"/>`;
+  }
+
+  // Gable with black-and-white half-timbering and dark barge boards.
+  function timberGable(x, y, w, rise, fill) {
+    const mid = x + w / 2;
+    let s = poly(`${x},${y} ${mid},${y - rise} ${x + w},${y}`, fill) + `<g stroke="${P.timber}" stroke-width="1.6">`;
+    for (let i = 1; i < 6; i++) {
+      const xx = x + (w * i) / 6;
+      s += `<line x1="${xx}" y1="${y}" x2="${xx}" y2="${(y - rise * (1 - Math.abs(xx - mid) / (w / 2))).toFixed(1)}"/>`;
+    }
+    s += `<line x1="${x}" y1="${y}" x2="${x + w}" y2="${y}" stroke-width="2.2"/></g>`;
+    return s + `<polyline points="${x - 3},${y + 2} ${mid},${y - rise - 2} ${x + w + 3},${y + 2}" fill="none" stroke="${P.timber}" stroke-width="2.4"/>`;
+  }
+
+  function timberBand(x, y, w, h, fill) {
+    const n = Math.max(2, Math.round(w / 7));
+    let s = r(x, y, w, h, fill) + `<g stroke="${P.timber}" stroke-width="1.5">`;
+    for (let i = 0; i <= n; i++) s += `<line x1="${(x + (w * i) / n).toFixed(1)}" y1="${y}" x2="${(x + (w * i) / n).toFixed(1)}" y2="${y + h}"/>`;
+    return s + `<line x1="${x}" y1="${y}" x2="${x + w}" y2="${y}" stroke-width="2"/><line x1="${x}" y1="${y + h}" x2="${x + w}" y2="${y + h}" stroke-width="2"/></g>`;
+  }
+
+  // Clay tile-hanging: rows of scalloped tiles on an upper storey or gable.
+  function tileHung(x, y, w, h) {
+    let s = r(x, y, w, h, '#b65a3b') + `<g fill="none" stroke="${P.tileDark}" stroke-width=".6">`;
+    for (let yy = y + 3, row = 0; yy < y + h; yy += 3, row++) {
+      let d = `M${x + (row % 2) * 1.5} ${yy}`;
+      for (let xx = x + (row % 2) * 1.5; xx < x + w - 2.5; xx += 3) d += ` q1.5 1.8 3 0`;
+      s += `<path d="${d}"/>`;
+    }
+    return s + '</g>';
+  }
+
+  // Each house returns its markup and the centre x of its front door(s), for paths and porches.
+  const BODY = {
+    rambler(wall) {
+      const x = 30, w = 100, h = 30, y = GROUND - h;
+      let s = stack(x + 66, y - 14, 10) + hipRoof(x, y, w, 24, 30, 5) + r(x, y, w, h, wall) + brickWall(x, GROUND - 6, w, 6);
+      for (const bx of [x + 4, x + w - 34]) s += hipRoof(bx, y + 1, 30, 5, 5, 2) + bay(bx, y + 1, 30, h - 7, wall) + brickWall(bx, GROUND - 6, 30, 6);
+      const dx = x + w / 2 - 5;
+      s += arch(dx - 5, 20, y + 4, 'rgba(0,0,0,.2)') + sunDoor(dx, y + 11, h - 11);
+      return { svg: s, doors: [dx + 5] };
+    },
+    cottage(wall) {
+      const x = 20, w = 120, h = 56, y = GROUND - h, mid = x + w / 2;
+      let s = stack(mid - 6, y - 18, 10, 12) + hipRoof(x, y, w, 26, 36, 5) + r(x, y, w, h, wall) + brickWall(x, y + 28, w, h - 28);
+      s += r(mid - 0.5, y, 1, h, 'rgba(0,0,0,.18)');
+      const doors = [];
+      for (const side of [-1, 1]) {
+        const bx = side < 0 ? x + 5 : x + w - 33;
+        s += hipRoof(bx, y + 3, 28, 6, 5, 2) + bay(bx, y + 3, 28, h - 3, wall, 2) + brickWall(bx, y + 30, 28, 4);
+        const dx = side < 0 ? mid - 20 : mid + 10;
+        s += crittall(dx - 1, y + 9, 12, 11, 2) + r(dx - 4, y + 31, 18, 2.5, P.tileDark) + sunDoor(dx, y + 35, h - 35, side < 0 ? P.door : '#2c4a6b');
+        doors.push(dx + 5);
+      }
+      return { svg: s, doors };
+    },
+    colonial(wall) {
+      const x = 34, w = 96, h = 54, y = GROUND - h, gx = x - 4, gw = 46;
+      let s = stack(x + w - 18, y - 12, 18) + hipRoof(x, y, w, 24, 26, 4) + r(x, y, w, h, wall) + brickWall(x, y + 27, w, h - 27);
+      const dx = x + 64;
+      s += crittall(x + 58, y + 8, 20, 13, 2) + crittall(x + 81, y + 34, 10, 13, 1);
+      s += arch(dx - 4, 18, y + 29, P.stone) + sunDoor(dx, y + 37, h - 37);
+      s += timberGable(gx, y, gw, 24, wall) + timberBand(gx, y, gw, 27, wall) + brickWall(gx, y + 27, gw, h - 27);
+      s += bay(gx + 7, y + 4, gw - 14, h - 4, wall, 2);
+      return { svg: s, doors: [dx + 5] };
+    },
+    victorian(wall) {
+      const x = 28, w = 104, h = 52, y = GROUND - h, tx = x + 48, tw = 16;
+      let s = r(x, y, w, h, wall) + r(x - 1, y - 3, w + 2, 3, P.green) + r(x, y, 6, h, 'rgba(0,0,0,.07)');
+      for (const wy of [y + 8, y + 31]) s += ribbon(x, wy, 38, 13, 4, 5);
+      s += r(tx, y - 12, tw, h + 12, wall) + r(tx - 1, y - 15, tw + 2, 3, P.green) + ribbon(tx + 4, y - 7, tw - 8, 44, 11);
+      const dx = x + 72;
+      s += ribbon(x + 70, y + 8, 28, 13, 4);
+      s += r(dx - 5, y + 30, 20, 3, P.green, 'rx="1.5"') + sunDoor(dx, y + 34, h - 34, '#7a2f35');
+      s += `<circle cx="${dx + 21}" cy="${y + 41}" r="4.6" fill="${P.frame}"/><circle cx="${dx + 21}" cy="${y + 41}" r="3.5" fill="${P.glass}"/>`;
+      return { svg: s, doors: [dx + 5] };
+    },
+    craftsman(wall) {
+      const x = 25, w = 110, h = 48, y = GROUND - h, gx = x + 56, gw = 54;
+      // The catslide roof sweeps down to the ground floor, so the left wall only shows below it.
+      let s = stack(x + 40, y - 20, 30, 9) + r(x, y + 24, gx - x, h - 24, wall) + r(gx, y, x + w - gx, h, wall);
+      s += poly(`${x - 7},${y + 24} ${x + 44},${y - 22} ${gx + 4},${y - 22} ${gx + 4},${y + 24}`, P.tile);
+      s += poly(`${x + 16},${y + 10} ${x + 23},${y + 2} ${x + 30},${y + 10}`, P.tileDark) + crittall(x + 19, y + 5, 8, 5, 2);
+      const dx = x + 26;
+      s += arch(dx - 3, 16, y + 28, 'rgba(0,0,0,.2)') + sunDoor(dx, y + 32, h - 32, '#4a3524') + crittall(x + 3, y + 30, 12, 10, 2);
+      s += tileHung(gx, y - 2, gw, 24) + poly(`${gx - 4},${y} ${gx + gw / 2},${y - 28} ${gx + gw + 4},${y}`, P.tile);
+      s += poly(`${gx + 6},${y - 1} ${gx + gw / 2},${y - 20} ${gx + gw - 6},${y - 1}`, '#b65a3b') + tileHung(gx + 14, y - 12, gw - 28, 11);
+      s += r(gx, y + 22, gw, h - 22, wall) + crittall(gx + 7, y + 30, gw - 14, 11, 5) + crittall(gx + 12, y + 6, gw - 24, 10, 4);
+      return { svg: s, doors: [dx + 5] };
+    },
+    mansion(wall) {
+      const x = 12, w = 136, h = 58, y = GROUND - h, cw = 36, cx = x + cw, cwid = w - 2 * cw;
+      let s = stack(x + 52, y - 14, 20, 6) + stack(x + 59, y - 14, 20, 6) + stack(x + 77, y - 14, 20, 6) + stack(x + 84, y - 14, 20, 6);
+      s += hipRoof(cx - 4, y, cwid + 8, 20, 16, 2) + timberBand(cx, y, cwid, 28, wall) + brickWall(cx, y + 28, cwid, h - 28);
+      s += crittall(cx + 6, y + 8, 16, 12, 3) + crittall(cx + cwid - 22, y + 8, 16, 12, 3) + crittall(cx + cwid / 2 - 5, y + 8, 10, 12, 2);
+      s += crittall(cx + 6, y + 36, 14, 12, 2) + crittall(cx + cwid - 20, y + 36, 14, 12, 2);
+      for (const wx of [x, x + w - cw]) {
+        s += timberGable(wx, y - 2, cw, 22, wall) + timberBand(wx, y - 2, cw, 30, wall) + brickWall(wx, y + 28, cw, h - 28);
+        s += crittall(wx + 8, y + 6, cw - 16, 13, 3) + bay(wx + 6, y + 32, cw - 12, h - 32, P.stone);
+      }
+      const dx = cx + cwid / 2 - 5;
+      s += arch(dx - 5, 20, y + 30, P.stone) + sunDoor(dx, y + 40, h - 40, '#5a3722');
+      return { svg: s, doors: [dx + 5] };
+    },
+  };
+
+  // Brick-sided porch with a tiled gable over a front door.
+  function porch(d) {
+    const x = d - 11, y = GROUND - 23;
+    return brickWall(x, y + 5, 4, 18) + brickWall(x + 18, y + 5, 4, 18) + poly(`${x - 3},${y + 6} ${d},${y - 3} ${x + 25},${y + 6}`, P.tile) +
+      r(x - 3, y + 5, 28, 1.6, P.tileDark);
+  }
+
+  // Privet hedge with a sunburst gate and a crazy-paving path to each door, and a few roses.
+  function yard(doors) {
     let s = '';
-    for (const bx of [left, left + 10, right - 10, right]) s += `<ellipse cx="${bx}" cy="${GROUND - 2}" rx="7" ry="6" fill="#3f7d3a"/><ellipse cx="${bx - 2}" cy="${GROUND - 4}" rx="3.5" ry="3" fill="#5a9c4c"/>`;
-    const flowers = ['#e86a8a', '#f2c14e', '#ffffff', '#b37fe0'];
-    for (let i = 0; i < 12; i++) s += `<circle cx="${14 + i * 12}" cy="${GROUND + 9 + (i % 2) * 2}" r="1.6" fill="${flowers[i % 4]}"/>`;
-    s += `<g fill="#fdfbf6">${Array.from({ length: 22 }, (_, i) => `<rect x="${4 + i * 7}" y="${GROUND + 5}" width="3" height="9"/>`).join('')}</g>`;
-    s += r(2, GROUND + 8, W - 4, 1.5, '#fdfbf6');
+    for (const d of doors) {
+      s += `<g fill="#cfc4ab" stroke="#a79c83" stroke-width=".5">` +
+        [[-5, 0, 0, 0, -1, 4, -5, 5], [0, 0, 5, 0, 5, 6, -1, 4], [-5, 5, -1, 4, 0, 10, -5, 10], [-1, 4, 5, 6, 5, 11, 0, 10], [-5, 10, 0, 10, 1, 16, -5, 16], [0, 10, 5, 11, 5, 16, 1, 16]]
+          .map((q) => `<polygon points="${q.map((v, i) => (i % 2 ? GROUND + v : d + v)).join(' ')}"/>`).join('') + '</g>';
+    }
+    const gaps = doors.map((d) => [d - 7, d + 7]);
+    let from = 2;
+    for (const [a, b] of gaps.concat([[W - 2, W]])) {
+      if (a > from) s += r(from, GROUND + 7, a - from, 7, P.hedge, 'rx="2.5"') + r(from + 1, GROUND + 7, a - from - 2, 2.5, P.hedgeHi, 'rx="1.2"');
+      from = b;
+    }
+    for (const d of doors) {
+      s += r(d - 7, GROUND + 9, 14, 5, 'none', `stroke="${P.frame}" stroke-width="1"`) + `<g stroke="${P.frame}" stroke-width=".8">` +
+        [0, 45, 90, 135, 180].map((a) => { const t = (a * Math.PI) / 180; return `<line x1="${d}" y1="${GROUND + 14}" x2="${(d + Math.cos(t) * 6).toFixed(1)}" y2="${(GROUND + 14 - Math.sin(t) * 4.6).toFixed(1)}"/>`; }).join('') + '</g>';
+    }
+    const roses = ['#c8374d', '#f2c14e', '#f4f0e6', '#e0768c'];
+    for (let i = 0; i < 13; i++) {
+      const rx = 8 + i * 12;
+      if (!gaps.some(([a, b]) => rx > a - 2 && rx < b + 2)) s += `<circle cx="${rx}" cy="${GROUND + 7}" r="1.5" fill="${roses[i % 4]}"/>`;
+    }
+    return s;
+  }
+
+  function house(type, upgrades = []) {
+    const c = STYLE[type];
+    const wall = upgrades.includes('paint') ? c.paint : c.wall;
+    const { svg, doors } = BODY[type](wall);
+    let s = `<ellipse cx="${W / 2}" cy="${GROUND + 1}" rx="${c.w / 2 + 12}" ry="4" fill="rgba(0,0,0,.18)"/>`;
+    if (!upgrades.includes('yard')) s += doors.map((d) => `<rect class="g-walk" x="${d - 5}" y="${GROUND}" width="10" height="16"/>`).join('');
+    s += svg;
+    if (upgrades.includes('porch')) s += doors.map(porch).join('');
+    if (upgrades.includes('yard')) s += yard(doors);
     return s;
   }
 
@@ -130,16 +266,6 @@
   function tree(x, y, s = 1) {
     return `<rect x="${x - 2 * s}" y="${y}" width="${4 * s}" height="${12 * s}" fill="#6b4a33"/>` +
       `<circle cx="${x}" cy="${y - 4 * s}" r="${11 * s}" class="g-tree"/><circle cx="${x - 5 * s}" cy="${y - 1 * s}" r="${8 * s}" class="g-tree2"/><circle cx="${x + 4 * s}" cy="${y - 9 * s}" r="${6 * s}" class="g-tree2"/>`;
-  }
-
-  function house(type, upgrades = []) {
-    const c = STYLE[type];
-    const wall = upgrades.includes('paint') ? c.paint : c.wall;
-    let s = `<ellipse cx="${W / 2}" cy="${GROUND + 1}" rx="${c.w / 2 + 12}" ry="4" fill="rgba(0,0,0,.18)"/>`;
-    s += BODY[type](c, wall);
-    if (upgrades.includes('porch')) s += porch(c);
-    if (upgrades.includes('yard')) s += yard(c);
-    return s;
   }
 
   function rundown() {
@@ -200,7 +326,7 @@
 
   // Full picture for a lot. `id` keeps clip-path ids unique on the page.
   function lotSVG(lot, id) {
-    let inner = lawn(lot.kind === 'house' && !lot.task);
+    let inner = lawn(false);
     if (!lot.task) {
       if (lot.kind === 'house') inner += house(lot.house.type, lot.house.upgrades);
       else if (lot.kind === 'special') inner += SPECIAL[lot.special]();

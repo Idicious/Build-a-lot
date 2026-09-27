@@ -16,7 +16,7 @@ npm start   # python3 -m http.server 8000, then visit http://localhost:8000
 
 - **Money, materials, crew.** Building costs no money: houses, upgrades and neighbourhood buildings are paid for in building materials and crew time. You buy the materials with cash at a market price that moves every day, so buying when the price is low pays off. Cash also buys lots and hires crew.
 - **Rent.** Houses are rented as soon as they are built. Tenants pay their rent into your bank automatically once a day.
-- **Houses.** Rambler, Cottage, Colonial, Victorian, Craftsman and Mansion, each costing more and paying more rent.
+- **Houses.** 1930s English homes: Bungalow, Semi, Mock Tudor house, Suntrap house, Arts & Crafts villa and Tudor manor, each costing more and paying more rent.
 - **Upgrades.** Fresh paint, landscaping and a front porch raise rent and resale value.
 - **Selling and demolition.** Sell a house together with its lot for a profit, tear down run-down shacks, or clear your own house to rebuild bigger.
 - **Neighbourhood buildings.** A Pocket Park adds +20% rent to the houses next to it and across the street. A Lumber Mill makes materials every day. A Workshop speeds up all construction.
