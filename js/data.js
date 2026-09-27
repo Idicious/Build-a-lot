@@ -7,15 +7,15 @@
   // Real seconds in one in-game day at 1x speed.
   const DAY_SECONDS = 12;
 
-  // Construction is paid for in materials only; materials are bought with cash.
+  // 1930s English house types. Construction is paid for in materials only; materials are bought with cash.
   // Rent is paid once per day; value is what the house (without the lot) sells for.
   const HOUSES = {
-    rambler:   { name: 'Rambler',   materials: 16,  workers: 1, days: 1,   rent: 200,  value: 2400 },
-    cottage:   { name: 'Cottage',   materials: 35,  workers: 1, days: 1.5, rent: 420,  value: 5000 },
-    colonial:  { name: 'Colonial',  materials: 70,  workers: 2, days: 2,   rent: 800,  value: 10000 },
-    victorian: { name: 'Victorian', materials: 130, workers: 2, days: 2.5, rent: 1400, value: 18500 },
-    craftsman: { name: 'Craftsman', materials: 210, workers: 3, days: 3,   rent: 2200, value: 31000 },
-    mansion:   { name: 'Mansion',   materials: 380, workers: 4, days: 4,   rent: 3800, value: 56000 },
+    rambler:   { name: 'Bungalow',  materials: 16,  workers: 1, days: 1,   rent: 200,  value: 2400 },
+    cottage:   { name: 'Semi',      materials: 35,  workers: 1, days: 1.5, rent: 420,  value: 5000 },
+    colonial:  { name: 'Mock Tudor house',  materials: 70,  workers: 2, days: 2,   rent: 800,  value: 10000 },
+    victorian: { name: 'Suntrap house', materials: 130, workers: 2, days: 2.5, rent: 1400, value: 18500 },
+    craftsman: { name: 'Arts & Crafts villa', materials: 210, workers: 3, days: 3,   rent: 2200, value: 31000 },
+    mansion:   { name: 'Tudor manor',  materials: 380, workers: 4, days: 4,   rent: 3800, value: 56000 },
   };
 
   // An upgrade needs a share of the materials that went into the house.
@@ -99,7 +99,7 @@
     },
     {
       name: 'Garnet Bay', perRow: 6,
-      intro: 'Waterfront lots draw a better class of tenant. Craftsman homes are in demand.',
+      intro: 'Waterfront lots draw a better class of tenant. Arts & Crafts villas are in demand.',
       lots: ['o', 's3000', 's3000', 's3200', 'r1500', 's3400', 'h:colonial', 's3000', 'r1500', 's3200', 's3400', 'o'],
       cash: 14000, materials: 40, workers: 4, maxWorkers: 8,
       houses: ['cottage', 'colonial', 'victorian', 'craftsman'], upgrades: ['paint', 'yard', 'porch'], specials: ['park', 'mill', 'workshop'], canSell: true,
@@ -108,7 +108,7 @@
     },
     {
       name: 'Hillcrest Estates', perRow: 7,
-      intro: 'The finest address in the county. Build mansions and fill every lot.',
+      intro: 'The finest address in the county. Build Tudor manors and fill every lot.',
       lots: ['o', 's4000', 's4000', 'r2000', 's4200', 's4400', 's4600', 'h:colonial', 's4000', 'r2000', 's4200', 's4400', 'o', 's4800'],
       cash: 20000, materials: 50, workers: 5, maxWorkers: 9,
       houses: ['cottage', 'colonial', 'victorian', 'craftsman', 'mansion'], upgrades: ['paint', 'yard', 'porch'], specials: ['park', 'mill', 'workshop'], canSell: true,
