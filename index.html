@@ -15,7 +15,7 @@
     <header class="menu-head">
       <p class="eyebrow">A neighbourhood building game</p>
       <h1 id="menu-title">Lot by Lot</h1>
-      <p class="lede">Buy empty lots, build houses, collect the rent and grow eight streets into the best addresses in the county. Finish a street by its Expert day to earn the gold key.</p>
+      <p class="lede">Buy empty lots, build houses, earn rent and grow eight streets into the best addresses in the county. Finish a street by its Expert day to earn the gold key.</p>
       <div class="menu-actions">
         <button id="resume" class="btn primary" type="button" hidden>Resume</button>
         <button id="how-toggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="how">How to play</button>
@@ -24,10 +24,10 @@
         <ol>
           <li><strong>Buy a lot.</strong> Lots with a red sign are for sale. Click one, then buy it.</li>
           <li><strong>Build.</strong> Building is free, but every house needs materials and crew time. Buy materials with your cash at the day's market price, and buy more when the price is low.</li>
-          <li><strong>Collect rent.</strong> Tenants pay once a day. Click the coin above a house to bank it. Unpaid rent stops piling up after 3 days.</li>
+          <li><strong>Earn rent.</strong> Tenants move in as soon as a house is finished and pay their rent into your bank once a day.</li>
           <li><strong>Grow.</strong> Hire more crew, upgrade houses for higher rent, sell at a profit, and open parks, mills and workshops.</li>
         </ol>
-        <p class="keys">Keys: <kbd>Space</kbd> pause, <kbd>C</kbd> collect all rent, <kbd>1</kbd>–<kbd>3</kbd> game speed, <kbd>Esc</kbd> deselect, <kbd>M</kbd> mute sound.</p>
+        <p class="keys">Keys: <kbd>Space</kbd> pause, <kbd>1</kbd>–<kbd>3</kbd> game speed, <kbd>Esc</kbd> deselect, <kbd>M</kbd> mute sound.</p>
       </div>
     </header>
     <ol id="levels" class="levels"></ol>
@@ -64,7 +64,6 @@
         <span class="stat-row"><span id="hud-crew" class="stat-value"></span>
           <button id="hire" class="btn small" type="button"></button></span>
       </div>
-      <button id="collect-all" class="btn primary small" type="button">Collect rent</button>
       <button id="sound" class="btn ghost small sound-toggle" type="button" aria-pressed="true">♪ Sound on</button>
       <div class="speed" role="group" aria-label="Game speed">
         <button type="button" data-speed="0" aria-label="Pause">❚❚</button>

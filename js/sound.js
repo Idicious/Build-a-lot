@@ -69,6 +69,7 @@
 
   const SOUNDS = {
     click: () => tone(1800, { dur: 0.03, vol: 0.08, type: 'triangle' }),
+    rent: () => { tone(1319, { dur: 0.05, vol: 0.06, type: 'square' }); tone(1760, { at: 0.04, dur: 0.12, vol: 0.06, type: 'square' }); },
     coin: () => { tone(988, { dur: 0.09, vol: 0.18, type: 'square' }); tone(1319, { at: 0.07, dur: 0.28, vol: 0.18, type: 'square' }); },
     sell: () => notes([784, 988, 1175, 1568], { dur: 0.22, vol: 0.16, type: 'square', step: 0.06 }),
     buy: () => { noise({ dur: 0.05, vol: 0.25, freq: 3000 }); tone(1568, { at: 0.04, dur: 0.35, vol: 0.2, type: 'triangle' }); tone(2093, { at: 0.04, dur: 0.35, vol: 0.12, type: 'sine' }); },

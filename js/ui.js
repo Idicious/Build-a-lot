@@ -125,19 +125,17 @@
   }
 
   function lotSig(lot) {
-    return JSON.stringify([lot.kind, lot.owned, lot.house, lot.special, lot.task && [lot.task.kind, lot.task.type], lot.rent,
+    return JSON.stringify([lot.kind, lot.owned, lot.house, lot.special, lot.task && [lot.task.kind, lot.task.type],
       lot.kind === 'house' ? E.rentFor(game, lot) : 0, selected === lot.id]);
   }
 
   function renderLot(lot) {
     const el = lotEls[lot.id];
     const [name, detail] = lotLabel(lot);
-    const cap = lot.kind === 'house' ? E.rentFor(game, lot) * D.RENT_CAP_DAYS : 0;
     el.classList.toggle('selected', selected === lot.id);
     el.setAttribute('aria-label', `Lot ${lot.id + 1}: ${name}, ${detail}`);
     el.innerHTML = A.lotSVG(lot, lot.id) +
       (lot.task ? '<div class="bar"><i></i></div>' : '') +
-      (lot.rent > 0 ? `<button type="button" class="coin${lot.rent >= cap ? ' full' : ''}" data-collect="${lot.id}" aria-label="Collect ${fmt(lot.rent)} rent">${fmt(lot.rent).slice(1)}</button>` : '') +
       `<div class="lot-label"><b>${esc(name)}</b><span>${esc(detail)}</span></div>`;
   }
 
@@ -188,9 +186,6 @@
     const full = s.workers >= D.LEVELS[s.level].maxWorkers;
     setText('hire', full ? 'Full crew' : `Hire ${fmt(E.hireCost(s))}`);
     $('hire').disabled = !!E.checks.hire(s);
-    const waiting = s.lots.reduce((n, l) => n + l.rent, 0);
-    setText('collect-all', waiting ? `Collect ${fmt(waiting)}` : 'No rent due');
-    $('collect-all').disabled = !waiting;
     document.querySelectorAll('.speed button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === speed)));
     $('board').classList.toggle('paused', speed === 0 && s.status === 'playing');
 
@@ -253,7 +248,7 @@
 
     if (!lot) {
       card.innerHTML = `<h2>${esc(L.name)}</h2><p class="hint">${esc(L.intro)}</p>
-        <p class="hint">Pick a lot on the street to buy it, build on it or improve it. Click the gold coins to collect rent.</p>`;
+        <p class="hint">Pick a lot on the street to buy it, build on it or improve it. Tenants pay their rent into your bank every day.</p>`;
       return;
     }
 
@@ -291,9 +286,7 @@
       fact('Rent', `${fmt(E.rentFor(s, lot))}/day`);
       const park = E.parkBonus(s, lot);
       if (park) fact('Park bonus', `+${Math.round(park * 100)}%`);
-      fact('Rent waiting', fmt(lot.rent));
       if (L.canSell) fact('Sale price', fmt(E.saleValue(s, lot)));
-      if (lot.rent > 0) acts.push(actionButton({ act: 'collect', thumb: plainThumb('¢'), name: 'Collect rent', gain: `+${fmt(lot.rent)}`, cost: 'Tenants have paid' }));
       for (const k of L.upgrades) {
         if (lot.house.upgrades.includes(k)) continue;
         const u = D.UPGRADES[k];
@@ -342,6 +335,7 @@
     const won = events.some((ev) => ev.type === 'won');
     for (const ev of events) {
       if (ev.type === 'done') S.play('done');
+      else if (ev.type === 'rent') S.play('rent');
       else if (ev.type === 'materials') S.play('mill');
       else if (ev.type === 'goal' && !won) S.play('goal');
       else if (ev.type === 'won') S.play('win');
@@ -385,13 +379,13 @@
   // ---------- input ----------
   const ACTION_SOUNDS = {
     buyLot: 'buy', build: 'hammer', buildSpecial: 'hammer', upgrade: 'hammer', demolish: 'crash', sell: 'sell',
-    collect: 'coin', collectAll: 'coin', hire: 'hire', buyMaterials: 'materials',
+    hire: 'hire', buyMaterials: 'materials',
   };
 
   function doAction(act, arg) {
     if (!game || game.status !== 'playing') return;
     const fn = E.actions[act];
-    const res = act === 'collectAll' || act === 'hire' ? fn(game) : act === 'buyMaterials' ? fn(game, arg) : fn(game, selected, arg);
+    const res = act === 'hire' ? fn(game) : act === 'buyMaterials' ? fn(game, arg) : fn(game, selected, arg);
     if (!res.ok && res.reason) addLog(res.reason);
     S.play(res.ok ? ACTION_SOUNDS[act] : 'error');
     handleEvents();
@@ -449,22 +443,12 @@
     renderSound();
     for (const n of [1, 10, 50]) $(`buy${n}`).addEventListener('click', () => doAction('buyMaterials', n));
     $('hire').addEventListener('click', () => doAction('hire'));
-    $('collect-all').addEventListener('click', () => doAction('collectAll'));
     document.querySelector('.speed').addEventListener('click', (e) => {
       const b = e.target.closest('[data-speed]');
       if (b) setSpeed(Number(b.dataset.speed));
     });
 
     $('board').addEventListener('click', (e) => {
-      const coin = e.target.closest('[data-collect]');
-      if (coin) {
-        const id = Number(coin.dataset.collect);
-        E.actions.collect(game, id);
-        S.play('coin');
-        handleEvents();
-        render();
-        return;
-      }
       const lot = e.target.closest('.lot');
       if (lot) { S.play('click'); select(Number(lot.dataset.lot)); }
     });
@@ -491,7 +475,6 @@
       if (e.target.closest('input, textarea')) return;
       const onButton = e.target.closest('button, [role="button"]');
       if (e.key === ' ' && !onButton) { e.preventDefault(); setSpeed(speed === 0 ? 1 : 0); }
-      else if (e.key === 'c' || e.key === 'C') doAction('collectAll');
       else if (e.key === '1' || e.key === '2' || e.key === '3') setSpeed(SPEEDS[Number(e.key)]);
       else if (e.key === 'Escape') select(null);
       else if (e.key === 'm' || e.key === 'M') toggleSound();
