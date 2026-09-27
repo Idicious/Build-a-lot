@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lot by Lot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <section id="menu" class="menu" aria-labelledby="menu-title">
+    <header class="menu-head">
+      <p class="eyebrow">A neighbourhood building game</p>
+      <h1 id="menu-title">Lot by Lot</h1>
+      <p class="lede">Buy empty lots, build houses, collect the rent and grow eight streets into the best addresses in the county. Finish a street by its Expert day to earn the gold key.</p>
+      <div class="menu-actions">
+        <button id="resume" class="btn primary" type="button" hidden>Resume</button>
+        <button id="how-toggle" class="btn ghost" type="button" aria-expanded="false" aria-controls="how">How to play</button>
+      </div>
+      <div id="how" class="how" hidden>
+        <ol>
+          <li><strong>Buy a lot.</strong> Lots with a red sign are for sale. Click one, then buy it.</li>
+          <li><strong>Build.</strong> Building is free, but every house needs materials and crew time. Buy materials with your cash at the day's market price, and buy more when the price is low.</li>
+          <li><strong>Collect rent.</strong> Tenants pay once a day. Click the coin above a house to bank it. Unpaid rent stops piling up after 3 days.</li>
+          <li><strong>Grow.</strong> Hire more crew, upgrade houses for higher rent, sell at a profit, and open parks, mills and workshops.</li>
+        </ol>
+        <p class="keys">Keys: <kbd>Space</kbd> pause, <kbd>C</kbd> collect all rent, <kbd>1</kbd>–<kbd>3</kbd> game speed, <kbd>Esc</kbd> deselect.</p>
+      </div>
+    </header>
+    <ol id="levels" class="levels"></ol>
+    <footer class="menu-foot">
+      <span id="progress-summary"></span>
+      <button id="reset" class="btn link" type="button">Reset progress</button>
+      <span id="reset-confirm" class="reset-confirm" hidden>Erase all keys?
+        <button id="reset-yes" class="btn small danger" type="button">Erase</button>
+        <button id="reset-no" class="btn small ghost" type="button">Keep</button>
+      </span>
+    </footer>
+  </section>
+
+  <section id="game" class="game" hidden>
+    <header class="hud">
+      <button id="to-menu" class="btn ghost small" type="button">Streets</button>
+      <div class="hud-title">
+        <span id="hud-level" class="hud-level"></span>
+        <span class="hud-day"><span class="dial" id="day-dial" aria-hidden="true"></span><span id="hud-day"></span></span>
+      </div>
+      <div class="stat" title="Cash in the bank">
+        <span class="stat-label">Cash</span>
+        <span id="hud-cash" class="stat-value money"></span>
+      </div>
+      <div class="stat" title="Building materials">
+        <span class="stat-label">Materials <span id="hud-price" class="price"></span></span>
+        <span class="stat-row"><span id="hud-mat" class="stat-value"></span>
+          <button id="buy1" class="btn small" type="button">+1</button>
+          <button id="buy10" class="btn small" type="button">+10</button>
+          <button id="buy50" class="btn small" type="button">+50</button></span>
+      </div>
+      <div class="stat" title="Free crew / total crew">
+        <span class="stat-label">Crew</span>
+        <span class="stat-row"><span id="hud-crew" class="stat-value"></span>
+          <button id="hire" class="btn small" type="button"></button></span>
+      </div>
+      <button id="collect-all" class="btn primary small" type="button">Collect rent</button>
+      <div class="speed" role="group" aria-label="Game speed">
+        <button type="button" data-speed="0" aria-label="Pause">❚❚</button>
+        <button type="button" data-speed="1">1×</button>
+        <button type="button" data-speed="2">2×</button>
+        <button type="button" data-speed="4">4×</button>
+      </div>
+    </header>
+
+    <main class="play">
+      <div class="board-wrap">
+        <div id="board" class="board"></div>
+      </div>
+      <aside class="panel">
+        <section class="card goals">
+          <div class="card-head"><h2>Goals</h2><span id="expert" class="chip"></span></div>
+          <ul id="goals"></ul>
+        </section>
+        <section id="lot-card" class="card lot-card" aria-live="polite"></section>
+        <section class="card log">
+          <h2>Street news</h2>
+          <ul id="log"></ul>
+        </section>
+      </aside>
+    </main>
+  </section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="modal-key" class="key-badge" aria-hidden="true"></div>
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <div class="modal-actions">
+        <button id="modal-next" class="btn primary" type="button">Next street</button>
+        <button id="modal-replay" class="btn" type="button">Play again</button>
+        <button id="modal-menu" class="btn ghost" type="button">All streets</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/art.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
