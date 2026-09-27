@@ -1,5 +1,29 @@
 /* DOM layer: menus, HUD, board rendering and input. All rules live in engine.js. */
 (function () {
+  // The deploy workflow stamps one build id into index.html and here. Browsers cache each file
+  // separately, so right after a deploy a cached page can meet newer scripts (or the reverse),
+  // which would break the page. When the ids differ, reload once to fetch a matching set.
+  const BUILD = '__BUILD__';
+  const RELOAD_KEY = 'lotbylot.build-reload';
+  if (reloadIfStale()) return;
+
+  function reloadIfStale() {
+    const page = document.documentElement.dataset.build;
+    let tried = true;
+    try {
+      // A page with no stamp predates stamping, so it is stale too.
+      if (page === BUILD) { sessionStorage.removeItem(RELOAD_KEY); return false; }
+      tried = sessionStorage.getItem(RELOAD_KEY) === BUILD;
+      sessionStorage.setItem(RELOAD_KEY, BUILD);
+    } catch (e) { /* storage unavailable: skip the reload rather than risk a loop */ }
+    if (tried) return false;
+    // A new query string makes the browser fetch index.html again instead of using its cache.
+    const url = new URL(location.href);
+    url.searchParams.set('build', BUILD);
+    location.replace(url.href);
+    return true;
+  }
+
   const { data: D, engine: E, art: A, sound: S } = window.BAL;
   const $ = (id) => document.getElementById(id);
   const fmt = (n) => (n < 0 ? '−$' : '$') + Math.abs(Math.round(n)).toLocaleString('en-US');
@@ -492,6 +516,11 @@
 
   // ---------- boot ----------
   function boot(saved) {
+    const url = new URL(location.href);
+    if (url.searchParams.has('build')) {
+      url.searchParams.delete('build');
+      try { history.replaceState(null, '', url.href); } catch (e) { /* keep the query */ }
+    }
     wire();
     blockZoom();
     if (saved && saved.game) {
