@@ -5,7 +5,6 @@ const D = require('../js/data.js');
 function botStep(s) {
   const L = D.LEVELS[s.level];
   const A = E.actions;
-  A.collectAll(s);
   const pending = (kind) => L.goals.find((g, i) => g.kind === kind && !s.goalsMet[i]);
   const houses = L.houses.map((t) => [t, D.HOUSES[t]]);
   const cheapest = houses[0][1];

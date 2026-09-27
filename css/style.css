@@ -156,6 +156,7 @@ kbd {
 .price { text-transform: none; letter-spacing: 0; font-family: var(--font-mono); font-weight: 500; }
 .price.up { color: var(--accent); }
 .price.down { color: var(--good); }
+.sound-toggle[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
 .speed { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-left: auto; }
 .speed button { border: 0; background: var(--surface); padding: 6px 10px; cursor: pointer; font-family: var(--font-mono); font-size: 13px; min-width: 38px; }
 .speed button + button { border-left: 1px solid var(--line); }
@@ -203,15 +204,6 @@ kbd {
 .lot-label span { font-family: var(--font-mono); white-space: nowrap; }
 .lot .bar { position: absolute; left: 10%; right: 10%; top: 8px; height: 8px; border-radius: 4px; background: rgba(0, 0, 0, .35); overflow: hidden; }
 .lot .bar i { display: block; height: 100%; width: 0; background: var(--gold); border-radius: 4px; }
-.lot .coin {
-  position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px 3px 4px; border-radius: 999px;
-  background: #fff4cf; color: #5d4308; border: 2px solid #d99a1c; font-family: var(--font-mono); font-weight: 600; font-size: 13px;
-  cursor: pointer; animation: bob 1.6s ease-in-out infinite; box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
-}
-.lot .coin::before { content: '$'; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #d99a1c; color: #fff; font-size: 12px; }
-.lot .coin.full { background: #ffe08a; border-color: var(--accent); }
-@keyframes bob { 50% { transform: translate(-50%, -3px); } }
 .float {
   position: absolute; left: 50%; top: 34%; transform: translateX(-50%); pointer-events: none; z-index: 2;
   font-family: var(--font-mono); font-weight: 600; font-size: 16px; color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, .7);
@@ -284,7 +276,6 @@ kbd {
   .board.paused::after { content: 'Paused'; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lot .coin { animation: none; }
   .float { animation-duration: .01s; }
   .level-card, .btn { transition: none; }
 }

@@ -34,7 +34,6 @@
   const DEMOLISH = { cost: 300, workers: 1, days: 0.75 };
   const HIRE_BASE = 600;
   const HIRE_STEP = 400;
-  const RENT_CAP_DAYS = 3; // uncollected rent stops piling up after this many days
   const PARK_BONUS = 0.2;
   const MILL_OUTPUT = 4;
   const WORKSHOP_SPEED = 1 / 0.7;
@@ -120,6 +119,6 @@
 
   return {
     DAY_SECONDS, HOUSES, UPGRADES, SPECIALS, DEMOLISH, HIRE_BASE, HIRE_STEP,
-    RENT_CAP_DAYS, PARK_BONUS, MILL_OUTPUT, WORKSHOP_SPEED, MATERIAL_PRICE, LEVELS,
+    PARK_BONUS, MILL_OUTPUT, WORKSHOP_SPEED, MATERIAL_PRICE, LEVELS,
   };
 });

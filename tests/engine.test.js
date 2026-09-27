@@ -29,18 +29,16 @@ test('building uses materials and crew but no cash, then produces a rented house
   assert.equal(E.freeWorkers(s), s.workers);
 });
 
-test('rent accrues daily, caps after a few days and is collected by clicking', () => {
+test('rent is paid into the bank automatically once a day', () => {
   const s = E.createGame(0, 1);
   E.actions.build(s, 0, 'rambler');
-  day(s, 1);
-  day(s, 1);
-  assert.equal(s.lots[0].rent, D.HOUSES.rambler.rent);
-  day(s, 10);
-  assert.equal(s.lots[0].rent, D.HOUSES.rambler.rent * D.RENT_CAP_DAYS);
+  day(s, 1); // construction
   const cash = s.cash;
-  E.actions.collect(s, 0);
-  assert.equal(s.cash, cash + D.HOUSES.rambler.rent * D.RENT_CAP_DAYS);
-  assert.equal(s.lots[0].rent, 0);
+  day(s, 1);
+  assert.equal(s.cash, cash + D.HOUSES.rambler.rent);
+  day(s, 4);
+  assert.equal(s.cash, cash + D.HOUSES.rambler.rent * 5, 'rent keeps arriving with no cap');
+  assert.equal(s.stats.rentCollected, D.HOUSES.rambler.rent * 5);
 });
 
 test('materials cost cash at the market price', () => {

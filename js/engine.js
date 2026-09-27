@@ -19,7 +19,7 @@
     const lot = {
       id: i, row: i < perRow ? 0 : 1, col: i % perRow,
       owned: false, price: 0, kind: 'empty', house: null, special: null,
-      task: null, rent: 0, rentTimer: 0, prodTimer: 0,
+      task: null, rentTimer: 0, prodTimer: 0,
     };
     if (code === 'o') {
       lot.owned = true;
@@ -216,7 +216,6 @@
       const lot = s.lots[id];
       return act(checkDemolish(s, lot), () => {
         spend(s, D.DEMOLISH.cost, 0);
-        collectRent(s, lot);
         startTask(s, lot, { kind: 'demolish', days: D.DEMOLISH.days, workers: D.DEMOLISH.workers });
       });
     },
@@ -224,24 +223,12 @@
       const lot = s.lots[id];
       return act(checkSell(s, lot), () => {
         const value = saleValue(s, lot);
-        collectRent(s, lot);
         s.cash += value;
         s.stats.sold++;
         s.events.push({ type: 'money', lot: id, amount: value });
         s.events.push({ type: 'msg', text: `Sold the ${HOUSES[lot.house.type].name} for $${value.toLocaleString('en-US')}` });
-        Object.assign(lot, { owned: false, kind: 'empty', house: null, price: lot.basePrice, rent: 0, rentTimer: 0 });
+        Object.assign(lot, { owned: false, kind: 'empty', house: null, price: lot.basePrice, rentTimer: 0 });
       });
-    },
-    collect(s, id) {
-      const lot = s.lots[id];
-      if (lot.rent <= 0) return { ok: false, reason: 'No rent waiting' };
-      collectRent(s, lot);
-      return { ok: true };
-    },
-    collectAll(s) {
-      const waiting = s.lots.filter((l) => l.rent > 0);
-      waiting.forEach((l) => collectRent(s, l));
-      return waiting.length ? { ok: true } : { ok: false, reason: 'No rent waiting' };
     },
     hire(s) {
       return act(checkHire(s), () => {
@@ -256,14 +243,6 @@
       });
     },
   };
-
-  function collectRent(s, lot) {
-    if (lot.rent <= 0) return;
-    s.cash += lot.rent;
-    s.stats.rentCollected += lot.rent;
-    s.events.push({ type: 'money', lot: lot.id, amount: lot.rent });
-    lot.rent = 0;
-  }
 
   function finishTask(s, lot) {
     const t = lot.task;
@@ -287,7 +266,6 @@
       if (lot.kind === 'rundown') s.stats.demolished++;
       lot.kind = 'empty';
       lot.house = null;
-      lot.rent = 0;
       s.events.push({ type: 'msg', text: 'Lot cleared and ready to build' });
     }
     s.events.push({ type: 'done', lot: lot.id });
@@ -374,8 +352,11 @@
         lot.rentTimer += dayDelta;
         if (lot.rentTimer >= 1 - EPS) {
           lot.rentTimer -= 1;
+          // Tenants pay straight into the bank.
           const r = rentFor(s, lot);
-          lot.rent = Math.min(lot.rent + r, r * D.RENT_CAP_DAYS);
+          s.cash += r;
+          s.stats.rentCollected += r;
+          s.events.push({ type: 'money', lot: lot.id, amount: r });
           s.events.push({ type: 'rent', lot: lot.id });
         }
       } else if (lot.kind === 'special' && lot.special === 'mill') {
