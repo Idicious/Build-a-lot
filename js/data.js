@@ -28,16 +28,18 @@
   const SPECIALS = {
     park:     { name: 'Pocket Park', materials: 36, workers: 1, days: 1, blurb: '+20% rent for neighbouring houses' },
     mill:     { name: 'Lumber Mill', materials: 50, workers: 2, days: 2, blurb: '+4 materials every day' },
-    workshop: { name: 'Workshop',    materials: 60, workers: 2, days: 2, blurb: 'All construction 30% faster' },
+    workshop: { name: 'Workshop', materials: 900, workers: 3, days: 2, blurb: 'Half-price hiring, inspection and 2× training speed' },
   };
 
   const DEMOLISH = { cost: 300, workers: 1, days: 0.75 };
-  const HIRE_BASE = 600;
-  const HIRE_STEP = 400;
+  const HIRE_BASE = 50000;
+  const HIRE_STEP = 40000;
   const PARK_BONUS = 0.2;
   const MILL_OUTPUT = 4;
-  const WORKSHOP_SPEED = 1 / 0.7;
+  const WORKSHOP_SPEED = 2;
   const MATERIAL_PRICE = { start: 100, min: 60, max: 150 };
+  const HOUSE_DECAY_DAYS = 8;
+  const TRAINING_COST = 75000;
 
   // Lot codes: 'o' owned empty lot, 'sN' empty lot for sale at $N,
   // 'rN' run-down house for sale at $N (buy, then demolish),
@@ -119,6 +121,6 @@
 
   return {
     DAY_SECONDS, HOUSES, UPGRADES, SPECIALS, DEMOLISH, HIRE_BASE, HIRE_STEP,
-    PARK_BONUS, MILL_OUTPUT, WORKSHOP_SPEED, MATERIAL_PRICE, LEVELS,
+    PARK_BONUS, MILL_OUTPUT, WORKSHOP_SPEED, MATERIAL_PRICE, HOUSE_DECAY_DAYS, TRAINING_COST, LEVELS,
   };
 });
