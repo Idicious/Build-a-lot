@@ -24,7 +24,7 @@ npm start   # python3 -m http.server 8000, then visit http://localhost:8000
 
 Sound effects are synthesized in the browser with the Web Audio API, so there are no audio files. Toggle them with the Sound button or `M`; the choice is remembered.
 
-Keys: `Space` pause, `1`–`3` game speed, `Esc` deselect, `M` mute sound.
+Keys: `Space` pause, `1`–`4` game speed, `Esc` deselect, `M` mute sound.
 
 ## Code
 
