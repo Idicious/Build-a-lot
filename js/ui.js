@@ -32,7 +32,7 @@
   const days = (d) => `${d} day${d === 1 ? '' : 's'}`;
 
   const STORE_KEY = 'lotbylot.progress.v1';
-  const SPEEDS = [0, 1, 2, 4];
+  const SPEEDS = [0, 1, 2, 4, 8];
 
   let progress = loadProgress();
   let game = null;
@@ -499,7 +499,7 @@
       if (e.target.closest('input, textarea')) return;
       const onButton = e.target.closest('button, [role="button"]');
       if (e.key === ' ' && !onButton) { e.preventDefault(); setSpeed(speed === 0 ? 1 : 0); }
-      else if (e.key === '1' || e.key === '2' || e.key === '3') setSpeed(SPEEDS[Number(e.key)]);
+      else if (e.key >= '1' && e.key <= '4') setSpeed(SPEEDS[Number(e.key)]);
       else if (e.key === 'Escape') select(null);
       else if (e.key === 'm' || e.key === 'M') toggleSound();
     });
