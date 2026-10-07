@@ -340,7 +340,7 @@
         acts.push(actionButton({ act: 'upgrade', arg: k, thumb: plainThumb({ star: '★', paint: '🖌', yard: '✿' }[k]), name: k === 'star' ? `Add star (${(lot.house.stars || 0) + 1}/3)` : u.name, gain, cost: costLine(0, mats, u.workers, u.days), why: E.checks.upgrade(s, lot, k), mats }));
       }
       acts.push(actionButton({ act: 'inspect', thumb: plainThumb('✓'), name: lot.house.damaged ? 'Inspect and repair' : 'Inspect house', cost: lot.house.damaged ? `${D.REPAIR_MATERIALS[lot.house.type]} repair materials` : 'Resets wear before damage', why: E.checks.inspect(s, lot), mats: lot.house.damaged ? D.REPAIR_MATERIALS[lot.house.type] : 0 }));
-      if (L.canSell) acts.push(actionButton({ act: 'sell', thumb: plainThumb('$'), name: 'Sell house and lot', gain: `+${fmt(E.saleValue(s, lot))}`, cost: 'The lot goes back on the market', why: E.checks.sell(s, lot) }));
+      acts.push(actionButton({ act: 'sell', thumb: plainThumb('$'), name: 'Sell house and lot', gain: `+${fmt(E.saleValue(s, lot))}`, cost: 'The lot goes back on the market', why: E.checks.sell(s, lot) }));
       acts.push(actionButton({ act: 'demolish', thumb: plainThumb('⌫'), name: 'Tear down', cost: costLine(D.DEMOLISH.cost, 0, D.DEMOLISH.workers, D.DEMOLISH.days), why: E.checks.demolish(s, lot) }));
     } else if (lot.kind === 'special') {
       const sp = D.SPECIALS[lot.special];
