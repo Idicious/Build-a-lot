@@ -9,7 +9,7 @@ function botStep(s) {
   const houses = L.houses.map((t) => [t, D.HOUSES[t]]);
   const cheapest = houses[0][1];
   const typeGoal = pending('houseType');
-  const inWork = (type) => s.lots.filter((l) => (l.task && l.task.type === type) || (l.house && l.house.type === type && !l.task)).length;
+  const inWork = (type) => s.lots.filter((l) => (l.task && l.task.type === type) || (l.owned && l.house && l.house.type === type && !l.task)).length;
   const typeShort = typeGoal ? typeGoal.target - inWork(typeGoal.type) : 0;
   const empties = () => s.lots.filter((l) => l.owned && l.kind === 'empty' && !l.task);
   const canPay = (cost, mats) => {
@@ -21,7 +21,7 @@ function botStep(s) {
   for (const lot of s.lots) if (lot.kind === 'rundown' && lot.owned) A.demolish(s, lot.id);
 
   if (E.hasWorkshop(s)) {
-    for (const lot of s.lots.filter((item) => item.kind === 'house' && item.house.damaged && !item.task)) {
+    for (const lot of s.lots.filter((item) => item.owned && item.kind === 'house' && item.house.damaged && !item.task)) {
       topUp(s, D.REPAIR_MATERIALS[lot.house.type]);
       A.inspect(s, lot.id);
     }
@@ -37,7 +37,7 @@ function botStep(s) {
   }
 
   let saving = 0;
-  const earners = s.lots.filter((l) => l.kind === 'house' || (l.task && l.task.kind === 'build')).length;
+  const earners = s.lots.filter((l) => l.owned && l.kind === 'house' || (l.task && l.task.kind === 'build')).length;
   for (const lot of empties()) {
     if (typeShort - saving > 0 && earners >= 2) {
       const h = D.HOUSES[typeGoal.type];
@@ -58,37 +58,37 @@ function botStep(s) {
 
   // Make room for the goal type when the street is full.
   if (typeShort > 0 && !empties().length && s.lots.every((l) => l.owned || l.kind !== 'empty')) {
-    const victim = s.lots.filter((l) => l.kind === 'house' && !l.task && l.house.type !== typeGoal.type)
+    const victim = s.lots.filter((l) => l.owned && l.kind === 'house' && !l.task && l.house.type !== typeGoal.type)
       .sort((a, b) => D.HOUSES[a.house.type].materials - D.HOUSES[b.house.type].materials)[0];
-    if (victim) (L.canSell ? A.sell : A.demolish)(s, victim.id);
+    if (victim) A.demolish(s, victim.id);
   }
 
   if (pending('sold')) {
-    const lot = s.lots.find((l) => l.kind === 'house' && !l.task);
+    const lot = s.lots.find((l) => l.owned && l.kind === 'house' && !l.task);
     if (lot) A.sell(s, lot.id);
   }
 
   const cashGoal = pending('cash');
   const houseGoal = pending('houses');
   if (L.canSell && cashGoal && !empties().length && s.cash < cashGoal.target &&
-      s.lots.filter((l) => l.kind === 'house').length > (houseGoal ? houseGoal.target : 0)) {
-    const victim = s.lots.filter((l) => l.kind === 'house' && !l.task)
+      s.lots.filter((l) => l.owned && l.kind === 'house').length > (houseGoal ? houseGoal.target : 0)) {
+    const victim = s.lots.filter((l) => l.owned && l.kind === 'house' && !l.task)
       .sort((a, b) => Number(b.house.damaged) - Number(a.house.damaged))[0];
     if (victim) A.sell(s, victim.id);
   }
 
   if (L.canSell && s.cash < 50000 && s.lots.some((l) => !l.owned && l.kind === 'empty')) {
-    const damaged = s.lots.find((l) => l.kind === 'house' && l.house.damaged && !l.task);
+    const damaged = s.lots.find((l) => l.owned && l.kind === 'house' && l.house.damaged && !l.task);
     if (damaged) A.sell(s, damaged.id);
   }
 
-  for (const lot of s.lots.filter((l) => l.kind === 'house' && !l.task))
+  for (const lot of s.lots.filter((l) => l.owned && l.kind === 'house' && !l.task))
     for (const key of L.upgrades) {
       const mats = E.upgradeMaterials(lot.house.type, key);
       if (s.cash > worth(mats) * 3 + 1000) { topUp(s, mats); A.upgrade(s, lot.id, key); }
     }
 
-  const forSale = s.lots.filter((l) => !l.owned).sort((a, b) => a.price - b.price)[0];
+  const forSale = s.lots.filter((l) => !l.owned && l.offMarketUntil == null).sort((a, b) => a.price - b.price)[0];
   const saveUp = typeShort > 0 ? worth(D.HOUSES[typeGoal.type].materials) * 0.5 : worth(cheapest.materials);
   if (forSale && (typeShort <= 0 || !empties().length) && s.cash > forSale.price + saveUp) A.buyLot(s, forSale.id);
 

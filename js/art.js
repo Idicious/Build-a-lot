@@ -337,7 +337,7 @@
       else if (lot.kind === 'rundown') inner += rundown();
       else if (lot.owned) inner += stakes() + tree(146, 30, 0.7);
       else inner += tree(18, 34, 0.8) + tree(146, 28, 0.7);
-      if (!lot.owned) inner += saleSign();
+      if (!lot.owned && lot.offMarketUntil == null) inner += saleSign();
     } else {
       const t = lot.task;
       let before = '', after = '';

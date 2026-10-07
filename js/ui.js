@@ -139,6 +139,7 @@
         : 'Tearing down';
       return [what, plural(t.workers, 'worker')];
     }
+    if (!lot.owned && lot.kind === 'house') return [D.HOUSES[lot.house.type].name, lot.offMarketUntil != null ? 'Off market' : `For sale · ${fmt(lot.price)}`];
     if (lot.kind === 'house') return [D.HOUSES[lot.house.type].name, lot.house.damaged ? 'damaged · no rent' : `${fmt(E.rentFor(game, lot))}/day`];
     if (lot.kind === 'special') {
       const extra = { park: '+20% rent', mill: 'materials half price · faster delivery', workshop: 'inspection · cheaper hiring · training' }[lot.special];
@@ -150,7 +151,7 @@
   }
 
   function lotSig(lot) {
-    return JSON.stringify([lot.kind, lot.owned, lot.house && [lot.house.type, lot.house.upgrades, lot.house.stars, lot.house.damaged], lot.special, lot.task && [lot.task.kind, lot.task.type],
+    return JSON.stringify([lot.kind, lot.owned, lot.offMarketUntil, lot.price, lot.house && [lot.house.type, lot.house.upgrades, lot.house.stars, lot.house.damaged], lot.special, lot.task && [lot.task.kind, lot.task.type],
       lot.kind === 'house' ? E.rentFor(game, lot) : 0, selected === lot.id]);
   }
 
@@ -299,13 +300,16 @@
       const [what, crew] = lotLabel(lot);
       title = what;
       sub = `Crew of ${crew.replace(/ workers?/, '')} on site. The work finishes on its own.`;
+    } else if (!lot.owned && lot.offMarketUntil != null) {
+      title = D.HOUSES[lot.house.type].name;
+      sub = 'This property is off the market.';
     } else if (!lot.owned) {
-      title = lot.kind === 'rundown' ? 'Run-down house' : lot.kind === 'damaged-sale' ? `Damaged ${D.HOUSES[lot.house.type].name}` : 'Lot for sale';
+      title = lot.kind === 'rundown' ? 'Run-down house' : lot.kind === 'damaged-sale' ? `Damaged ${D.HOUSES[lot.house.type].name}` : lot.kind === 'house' ? `${D.HOUSES[lot.house.type].name} for sale` : 'Lot for sale';
       sub = lot.kind === 'rundown' ? 'Cheap, but it has to come down before you can build.'
         : lot.kind === 'damaged-sale' ? 'Already damaged, so it is half price. Inspect it at your Workshop to restore rent.'
-        : 'An empty lot, ready for a new house.';
+        : lot.kind === 'house' ? 'Buy the completed house and its lot.' : 'An empty lot, ready for a new house.';
       fact('Asking price', fmt(lot.price));
-      acts.push(actionButton({ act: 'buyLot', thumb: plainThumb('$'), name: lot.kind === 'damaged-sale' ? 'Buy damaged house' : 'Buy this lot', cost: fmt(lot.price), why: E.checks.buyLot(s, lot) }));
+      acts.push(actionButton({ act: 'buyLot', thumb: plainThumb('$'), name: lot.kind === 'damaged-sale' ? 'Buy damaged house' : lot.kind === 'house' ? 'Buy house and lot' : 'Buy this lot', cost: fmt(lot.price), why: E.checks.buyLot(s, lot) }));
     } else if (lot.kind === 'rundown') {
       title = 'Run-down house';
       sub = 'Tear it down to free up the lot.';

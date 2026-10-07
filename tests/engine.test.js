@@ -95,16 +95,86 @@ test('paint raises resale value while stars raise value and rent', () => {
   assert.ok(E.rentFor(s, lot) > rent);
 });
 
-test('selling returns the lot to the market', () => {
-  const s = E.createGame(3, 1);
+test('selling pays the current value and preserves the house off market', () => {
+  const s = E.createGame(3);
   const lot = s.lots[0];
+  lot.house.upgrades = ['paint'];
+  lot.house.stars = 2;
+  const house = structuredClone(lot.house);
   const value = E.saleValue(s, lot);
   const cash = s.cash;
+  const otherHouses = s.lots.filter((l) => l !== lot && l.owned && l.kind === 'house');
   assert.equal(E.actions.sell(s, lot.id).ok, true);
   assert.equal(s.cash, cash + value);
   assert.equal(lot.owned, false);
-  assert.equal(lot.kind, 'empty');
+  assert.equal(lot.kind, 'house');
+  assert.deepEqual(lot.house, house);
+  assert.equal(lot.price, value);
   assert.equal(s.stats.sold, 1);
+  assert.match(E.actions.buyLot(s, lot.id).reason, /Not for sale/);
+  assert.equal(E.actions.sell(s, lot.id).ok, false);
+  assert.equal(E.actions.upgrade(s, lot.id, 'yard').ok, false);
+  assert.equal(E.actions.inspect(s, lot.id).ok, false);
+  assert.equal(E.goalProgress(s, { kind: 'houses', target: 1 }).current, otherHouses.length);
+  assert.equal(E.goalProgress(s, { kind: 'houseType', type: house.type, target: 1 }).current, otherHouses.filter((l) => l.house.type === house.type).length);
+  day(s);
+  assert.equal(s.cash, cash + value + otherHouses.reduce((sum, l) => sum + E.rentFor(s, l), 0), 'sold houses no longer pay the player rent');
+  assert.deepEqual(lot.house, house);
+});
+
+test('sold houses wait five days, then roll a 20% chance once per new day', (t) => {
+  const s = E.createGame(3);
+  const lot = s.lots[0];
+  const house = structuredClone(lot.house);
+  const value = E.saleValue(s, lot);
+  E.actions.sell(s, lot.id);
+  const random = t.mock.method(Math, 'random', () => 0.20);
+  day(s, 5);
+  assert.equal(random.mock.callCount(), 0, 'no rolls during the first five days');
+  assert.equal(E.actions.buyLot(s, lot.id).ok, false);
+  day(s);
+  assert.equal(random.mock.callCount(), 1);
+  assert.equal(E.actions.buyLot(s, lot.id).ok, false, '20% itself is outside the success interval');
+  E.tick(s, D.DAY_SECONDS / 2);
+  assert.equal(random.mock.callCount(), 1, 'no roll within a day');
+  random.mock.mockImplementation(() => 0.199999);
+  E.tick(s, D.DAY_SECONDS / 2);
+  assert.equal(random.mock.callCount(), 2);
+  assert.equal(lot.offMarketUntil, null);
+  assert.equal(lot.price, value);
+  assert.deepEqual(lot.house, house);
+  day(s);
+  assert.equal(random.mock.callCount(), 2, 'listed properties stop rolling');
+  const cash = s.cash;
+  assert.equal(E.actions.buyLot(s, lot.id).ok, true);
+  assert.equal(s.cash, cash - value);
+  assert.equal(lot.owned, true);
+  assert.equal(lot.kind, 'house');
+  assert.deepEqual(lot.house, house);
+  day(s);
+  assert.equal(s.cash, cash - value + E.rentFor(s, lot));
+  const resale = E.saleValue(s, lot);
+  assert.equal(E.actions.sell(s, lot.id).ok, true);
+  day(s, 5);
+  assert.equal(random.mock.callCount(), 2, 'selling again starts a fresh cooldown');
+  day(s);
+  assert.equal(random.mock.callCount(), 3);
+  assert.equal(lot.price, resale);
+});
+
+test('mid-day sales wait five full days and large ticks roll each eligible day', (t) => {
+  const s = E.createGame(3);
+  const lot = s.lots[0];
+  E.tick(s, D.DAY_SECONDS / 2);
+  E.actions.sell(s, lot.id);
+  const random = t.mock.method(Math, 'random', () => 1);
+  E.tick(s, 5 * D.DAY_SECONDS);
+  assert.equal(random.mock.callCount(), 0);
+  E.tick(s, D.DAY_SECONDS / 2);
+  assert.equal(random.mock.callCount(), 1);
+  E.tick(s, 3 * D.DAY_SECONDS);
+  assert.equal(random.mock.callCount(), 4);
+  assert.equal(E.actions.buyLot(s, lot.id).ok, false);
 });
 
 test('run-down houses must be bought and torn down before building', () => {

@@ -11,7 +11,7 @@
     const lot = {
       id: i, row: i < perRow ? 0 : 1, col: i % perRow,
       owned: false, price: 0, landPrice: 25000, kind: 'empty', house: null, special: null,
-      task: null, rentTimer: 0, prodTimer: 0, workshopActive: false,
+      offMarketUntil: null, task: null, rentTimer: 0, prodTimer: 0, workshopActive: false,
     };
     if (code === 'o') {
       lot.owned = true;
@@ -110,6 +110,7 @@
 
   function checkBuyLot(s, lot) {
     if (lot.owned) return 'Already yours';
+    if (lot.offMarketUntil != null) return 'Not for sale';
     if (s.cash < lot.price) return `Needs $${lot.price.toLocaleString('en-US')}`;
     return null;
   }
@@ -132,6 +133,7 @@
   }
 
   function checkUpgrade(s, lot, key) {
+    if (!lot.owned) return 'Buy the lot first';
     if (!level(s).upgrades.includes(key)) return 'Not available here';
     if (lot.kind !== 'house') return 'No house here';
     if (lot.house.damaged) return 'Repair the house before upgrading';
@@ -146,6 +148,7 @@
   }
 
   function checkSell(s, lot) {
+    if (!lot.owned) return 'Buy the lot first';
     if (!level(s).canSell) return 'Selling unlocks later';
     if (lot.kind !== 'house') return 'No house here';
     return idle(lot);
@@ -174,6 +177,7 @@
   }
 
   function checkInspect(s, lot) {
+    if (!lot.owned) return 'Buy the lot first';
     if (lot.kind !== 'house') return 'No house here';
     if (lot.task) return idle(lot);
     if (!hasWorkshop(s)) return 'Build a workshop to inspect houses';
@@ -250,7 +254,7 @@
         s.stats.sold++;
         s.events.push({ type: 'money', lot: id, amount: value });
         s.events.push({ type: 'msg', text: `Sold the ${HOUSES[lot.house.type].name} for $${value.toLocaleString('en-US')}` });
-        Object.assign(lot, { owned: false, kind: 'empty', house: null, price: lot.landPrice, basePrice: lot.landPrice, rentTimer: 0 });
+        Object.assign(lot, { owned: false, price: value, basePrice: value, offMarketUntil: s.time + 5 * DAY_SECONDS, rentTimer: 0 });
       });
     },
     hire(s) {
@@ -330,11 +334,18 @@
 
   function newDay(s) {
     s.day++;
+    const boundaryTime = (s.day - 1) * DAY_SECONDS;
+    for (const lot of s.lots) {
+      // Wait five full days, then roll once on each subsequent day boundary.
+      if (!lot.owned && lot.offMarketUntil != null && boundaryTime > lot.offMarketUntil + EPS && Math.random() < 0.20) {
+        lot.offMarketUntil = null;
+      }
+    }
   }
 
   function goalProgress(s, g) {
     let current = 0;
-    const houses = s.lots.filter((l) => l.kind === 'house');
+    const houses = s.lots.filter((l) => l.owned && l.kind === 'house');
     switch (g.kind) {
       case 'cash': current = s.cash; break;
       case 'houses': current = houses.length; break;
@@ -408,7 +419,7 @@
       if (lot.task) {
         lot.task.progress += (dayDelta * speed) / lot.task.days;
         if (lot.task.progress >= 1 - EPS) finishTask(s, lot);
-      } else if (lot.kind === 'house') {
+      } else if (lot.owned && lot.kind === 'house') {
         if (lot.house.damaged) {
           // damaged houses earn no rent until repaired
         } else {
